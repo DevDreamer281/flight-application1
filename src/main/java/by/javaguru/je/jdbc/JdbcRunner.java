@@ -23,7 +23,7 @@ public class JdbcRunner {
                 where flight_id = ?;
                 """;
 
-        try (var connection = ConnectionManager.open();
+        try (var connection = ConnectionManager.getConnection();
              var statement = connection.prepareStatement(sql)) {
             statement.setLong(1, flight_id);
             var result = statement.executeQuery();
@@ -46,7 +46,7 @@ public class JdbcRunner {
                 where departure_date between ? and ?;
                 """;
 
-        try (var connection = ConnectionManager.open();
+        try (var connection = ConnectionManager.getConnection();
              var statement = connection.prepareStatement(sql)){
             statement.setTimestamp(1, Timestamp.valueOf(start));
             statement.setTimestamp(2, Timestamp.valueOf(end));
