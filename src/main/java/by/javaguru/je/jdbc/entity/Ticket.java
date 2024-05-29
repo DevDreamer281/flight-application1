@@ -5,10 +5,10 @@ import java.util.Objects;
 
 public class Ticket {
     private Long id;
-    private String passportNumber;
+    private Integer passportNumber;
     private String passengerName;
     private Long flightId;
-    private String seatNumber;
+    private Integer seatNumber;
     private BigDecimal cost;
 
     public Ticket() {
@@ -16,10 +16,10 @@ public class Ticket {
 
     public Ticket(
             Long id,
-            String passportNumber,
+            Integer passportNumber,
             String passengerName,
             Long flightId,
-            String seatNumber,
+            Integer seatNumber,
             BigDecimal cost) {
         this.id = id;
         this.passportNumber = passportNumber;
@@ -37,11 +37,11 @@ public class Ticket {
         this.id = id;
     }
 
-    public String getPassportNumber() {
+    public Integer getPassportNumber() {
         return passportNumber;
     }
 
-    public void setPassportNumber(String passportNumber) {
+    public void setPassportNumber(Integer passportNumber) {
         this.passportNumber = passportNumber;
     }
 
@@ -61,11 +61,11 @@ public class Ticket {
         this.flightId = flightId;
     }
 
-    public String getSeatNumber() {
+    public Integer getSeatNumber() {
         return seatNumber;
     }
 
-    public void setSeatNumber(String seatNumber) {
+    public void setSeatNumber(Integer seatNumber) {
         this.seatNumber = seatNumber;
     }
 
