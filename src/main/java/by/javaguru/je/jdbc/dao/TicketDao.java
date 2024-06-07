@@ -3,6 +3,7 @@ package by.javaguru.je.jdbc.dao;
 import by.javaguru.je.jdbc.entity.Ticket;
 import by.javaguru.je.jdbc.exceptions.DaoException;
 import by.javaguru.je.jdbc.utills.ConnectionManager;
+import by.javaguru.je.jdbc.utills.SqlUtil;
 
 
 import java.sql.ResultSet;
@@ -12,38 +13,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+
 public class TicketDao {
     private static final TicketDao INSTANCE = new TicketDao();
 
-    private static String SAVE_SQL = """
-            insert into ticket (passport_number, passenger_name, flight_id, seat_number, cost) 
-            VALUES (?, ?, ?, ?, ?);
-            """;
 
-    private static String DELETE_SQL = """
-            delete from ticket where id = ?;
-            """;
-
-    private static String FIND_ALL_SQL = """
-            select id, passport_number, passenger_name, flight_id, seat_number, cost from ticket;
-            """;
-
-    private static String FIND_BY_ID_SQL = """
-            select id, passport_number, passenger_name, flight_id, seat_number, cost 
-            from ticket
-            where ticket.id = ?;
-            """;
 
 
     public Optional<Ticket> findById(Long id) {
         try (var connection = ConnectionManager.getConnection();
-             var statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+             var statement = connection.prepareStatement(SqlUtil.FIND_BY_ID_SQL)) {
             statement.setLong(1, id);
             var result = statement.executeQuery();
             Ticket ticket = null;
 
             if (result.next())
-                ticket = getTicket(result);
+                ticket = buildTicket(result);
 
             return Optional.ofNullable(ticket);
         } catch (SQLException e) {
@@ -54,14 +39,14 @@ public class TicketDao {
 
     public List<Ticket> findAll() {
         try (var connection = ConnectionManager.getConnection();
-             var statement = connection.prepareStatement(FIND_ALL_SQL)) {
+             var statement = connection.prepareStatement(SqlUtil.FIND_ALL_SQL)) {
 
             List<Ticket> tickets = new ArrayList<>();
 
             var result = statement.executeQuery();
             while (result.next()) {
                 tickets.add(
-                        getTicket(result)
+                        buildTicket(result)
                 );
             }
 
@@ -75,7 +60,7 @@ public class TicketDao {
 
     public Ticket save(Ticket ticket) {
         try (var connection = ConnectionManager.getConnection();
-             var statement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
+             var statement = connection.prepareStatement(SqlUtil.SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
             statement.setInt(1, ticket.getPassportNumber());
             statement.setString(2, ticket.getPassengerName());
             statement.setLong(3, ticket.getFlightId());
@@ -96,7 +81,7 @@ public class TicketDao {
 
     public boolean delete(Long id) {
         try (var connection = ConnectionManager.getConnection();
-             var statement = connection.prepareStatement(DELETE_SQL)) {
+             var statement = connection.prepareStatement(SqlUtil.DELETE_SQL)) {
 
 
             statement.setLong(1, id);
@@ -106,7 +91,7 @@ public class TicketDao {
         }
     }
 
-    private static Ticket getTicket(ResultSet result) throws SQLException {
+    private static Ticket buildTicket(ResultSet result) throws SQLException {
         return new Ticket(
                 result.getLong("id"),
                 result.getInt("passport_number"),
