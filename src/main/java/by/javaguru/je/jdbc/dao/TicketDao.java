@@ -5,10 +5,12 @@ import by.javaguru.je.jdbc.exceptions.DaoException;
 import by.javaguru.je.jdbc.utills.ConnectionManager;
 
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class TicketDao {
     private static final TicketDao INSTANCE = new TicketDao();
@@ -23,8 +25,32 @@ public class TicketDao {
             """;
 
     private static String FIND_ALL_SQL = """
-            select * from ticket;
+            select id, passport_number, passenger_name, flight_id, seat_number, cost from ticket;
             """;
+
+    private static String FIND_BY_ID_SQL = """
+            select id, passport_number, passenger_name, flight_id, seat_number, cost 
+            from ticket
+            where ticket.id = ?;
+            """;
+
+
+    public Optional<Ticket> findById(Long id) {
+        try (var connection = ConnectionManager.getConnection();
+             var statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+            statement.setLong(1, id);
+            var result = statement.executeQuery();
+            Ticket ticket = null;
+
+            if (result.next())
+                ticket = getTicket(result);
+
+            return Optional.ofNullable(ticket);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
+
 
     public List<Ticket> findAll() {
         try (var connection = ConnectionManager.getConnection();
@@ -33,19 +59,13 @@ public class TicketDao {
             List<Ticket> tickets = new ArrayList<>();
 
             var result = statement.executeQuery();
-            while (result.next())
+            while (result.next()) {
                 tickets.add(
-                        new Ticket(
-                                result.getLong("id"),
-                                result.getInt("passport_number"),
-                                result.getString("passenger_name"),
-                                result.getLong("flight_id"),
-                                result.getInt("seat_number"),
-                                result.getBigDecimal("cost")
-                        )
+                        getTicket(result)
                 );
+            }
 
-                return tickets;
+            return tickets;
         } catch (SQLException e) {
             throw new DaoException(e);
         }
@@ -77,11 +97,24 @@ public class TicketDao {
     public boolean delete(Long id) {
         try (var connection = ConnectionManager.getConnection();
              var statement = connection.prepareStatement(DELETE_SQL)) {
+
+
             statement.setLong(1, id);
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DaoException(e);
         }
+    }
+
+    private static Ticket getTicket(ResultSet result) throws SQLException {
+        return new Ticket(
+                result.getLong("id"),
+                result.getInt("passport_number"),
+                result.getString("passenger_name"),
+                result.getLong("flight_id"),
+                result.getInt("seat_number"),
+                result.getBigDecimal("cost")
+        );
     }
 
     public static TicketDao getInstance() {
