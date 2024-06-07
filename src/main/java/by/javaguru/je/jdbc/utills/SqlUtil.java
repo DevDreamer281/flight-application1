@@ -19,4 +19,10 @@ public class SqlUtil {
             from ticket
             where ticket.id = ?;
             """;
+
+    public static String UPDATE_SQL = """
+            update ticket 
+            set passport_number =?, passenger_name =?, flight_id =?, seat_number =?, cost =?
+            where id =?;
+            """;
 }

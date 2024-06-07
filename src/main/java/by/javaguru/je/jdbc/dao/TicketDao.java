@@ -20,6 +20,23 @@ public class TicketDao {
 
 
 
+    public boolean update(Ticket ticket){
+        try (var connection = ConnectionManager.getConnection();
+             var statement = connection.prepareStatement(SqlUtil.UPDATE_SQL, Statement.RETURN_GENERATED_KEYS)) {
+
+            statement.setInt(1, ticket.getPassportNumber());
+            statement.setString(2, ticket.getPassengerName());
+            statement.setLong(3, ticket.getFlightId());
+            statement.setInt(4, ticket.getSeatNumber());
+            statement.setBigDecimal(5, ticket.getCost());
+            statement.setLong(6, ticket.getId());
+
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
+
     public Optional<Ticket> findById(Long id) {
         try (var connection = ConnectionManager.getConnection();
              var statement = connection.prepareStatement(SqlUtil.FIND_BY_ID_SQL)) {
@@ -29,7 +46,6 @@ public class TicketDao {
 
             if (result.next())
                 ticket = buildTicket(result);
-
             return Optional.ofNullable(ticket);
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -56,7 +72,6 @@ public class TicketDao {
         }
 
     }
-
 
     public Ticket save(Ticket ticket) {
         try (var connection = ConnectionManager.getConnection();
